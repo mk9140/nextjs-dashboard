@@ -1,11 +1,13 @@
-import { Card } from '@/app/ui/dashboard/cards';
+// import { Card } from '@/app/ui/dashboard/cards';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
 import { lusitana } from '@/app/ui/fonts';
 // import {fetchRevenue, fetchLatestInvoices, fetchCardData} from '@/app/lib/data'; // 데이터베이스에서 데이터를 가져오는 쿼리(select문)를 실행하는 함수
 // import { fetchLatestInvoices, fetchCardData} from '@/app/lib/data'; // fetchRevenue (느린 데이터요청을 상정한 함수)는 Suspense를 사용하기위해 제외했다.
-import { fetchCardData} from '@/app/lib/data'; // fetchLatestInvoices는 Suspense를 사용하기위해 제외했다.
+// import { fetchCardData} from '@/app/lib/data'; // fetchLatestInvoices는 Suspense를 사용하기위해 제외했다. fetchCardData 또한 제외했다.
 
+import CardWrapper from '@/app/ui/dashboard/cards'; // Card 컴포넌트를 그룹화한 컴포넌트
+import { CardSkeleton } from "@/app/ui/skeletons"; // 로딩중 표시할 UI인, 스켈레톤 UI 컴포넌트를 임포트
 
 import { Suspense } from 'react'; // Suspense 컴포넌트를 임포트
 import { RevenueChartSkeleton, LatestInvoicesSkeleton } from '@/app/ui/skeletons'; // 로딩중 표시할 UI인, 스켈레톤 UI 컴포넌트를 임포트
@@ -28,12 +30,12 @@ export default async function Page() {
   // fetchCardData함수가 리턴하는 객체의 프로퍼티를 분해하여 변수에 할당.
   // 기본적으로는 객체의 프로퍼티명과 동일한 변수명을 사용해야 하지만, 다른 변수명을 사용하고 싶다면 아래와 같이 사용.
   // const { originalName: newName } = someObj;
-  const {
-    numberOfCustomers,
-    numberOfInvoices,
-    totalPaidInvoices,
-    totalPendingInvoices,
-  } = await fetchCardData(); // fetchLatestInvoices() 가 종료된 다음 실행된다.
+  // const {
+  //   numberOfCustomers,
+  //   numberOfInvoices,
+  //   totalPaidInvoices,
+  //   totalPendingInvoices,
+  // } = await fetchCardData(); // fetchLatestInvoices() 가 종료된 다음 실행된다.
 
   return (
     <main>
@@ -41,14 +43,23 @@ export default async function Page() {
         Dashboard
       </h1>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-         <Card title="Collected" value={totalPaidInvoices} type="collected" />
-         <Card title="Pending" value={totalPendingInvoices} type="pending" />
-         <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />
-         <Card
-          title="Total Customers"
-          value={numberOfCustomers}
-          type="customers"
-        />
+        {/* Card 컴포넌트도 Suspense 로 감싸고 싶다. */}
+        {/* 각 카드에서 필요한 데이터(totalPaidInvoices, totalPendingInvoices, ...) 를 개별적으로 fetch 하는 방식으로 할 수 있지만... */}
+        {/* fetch 완료된 카드가 개별적으로 렌더링되면 유저 입장에서는 시각적으로 불편할 수 있다.(정신 사납다...) */}
+        {/* Suspense를 사용하면서(스트리밍하면서) 동시에 로딩되게 하려면, 그룹화를 해야한다. */}
+        {/* Card 컴포넌트를 그룹화한 CardWrapper라는 컴포넌트를 Suspense로 감싼다. */}
+        <Suspense fallback={<CardSkeleton />}>
+          <CardWrapper />
+        </Suspense>
+
+        {/* <Card title="Collected" value={totalPaidInvoices} type="collected" />*/}
+        {/* <Card title="Pending" value={totalPendingInvoices} type="pending" />*/}
+        {/* <Card title="Total Invoices" value={numberOfInvoices} type="invoices" />*/}
+        {/* <Card*/}
+        {/*  title="Total Customers"*/}
+        {/*  value={numberOfCustomers}*/}
+        {/*  type="customers"*/}
+        {/*/>*/}
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
         {/* Suspense 컴포넌트를 사용해서, 특정 컴포넌트를 스트리밍 */}
