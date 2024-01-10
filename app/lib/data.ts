@@ -34,6 +34,9 @@ export async function fetchRevenue() {
 
 export async function fetchLatestInvoices() {
   try {
+    // 단순히 모든 invoice를 가져와서(limit null) 자바스크립트로 정렬할 수 도 있지만
+    // 데이터가 많아질수록 성능이 저하될 수 있습니다.
+    // 따라서, 데이터베이스에서 필요한 만큼만 가져온다.
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
       FROM invoices
@@ -64,6 +67,9 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
 
+    // JavaScript에서는 Promise.all 혹은 Promise.allSettled 을 사용하여 병렬로 수행할 수 있다.
+    // 그러나 이 JavaScript 패턴에만 의존하면 한 가지 단점이 있다.
+    // -> 하나의 데이터 요청이 다른 모든 데이터 요청보다 느리면 어떻게 될까요?
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
