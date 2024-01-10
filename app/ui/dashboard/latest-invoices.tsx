@@ -3,11 +3,17 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import { LatestInvoice } from '@/app/lib/definitions';
-export default async function LatestInvoices({
-  latestInvoices,
-}: {
-  latestInvoices: LatestInvoice[];
-}) {
+import { fetchLatestInvoices } from '@/app/lib/data';
+
+// props로 latestInvoices를 받아오는 방식에서, 컴포넌트 내부에서 latestInvoices를 가져오는 방식으로 변경
+// export default async function LatestInvoices({
+//   latestInvoices,
+// }: {
+//   latestInvoices: LatestInvoice[];
+// }) {
+export default async function LatestInvoices() {
+  const latestInvoices = await fetchLatestInvoices();
+
   return (
     <div className="flex w-full flex-col md:col-span-4">
       <h2 className={`${lusitana.className} mb-4 text-xl md:text-2xl`}>
