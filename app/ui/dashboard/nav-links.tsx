@@ -40,7 +40,6 @@ const links = [
 
 export default function NavLinks() {
   const pathname = usePathname(); // Next.js 의 usePathname 훅(hook) 사용
-  console.log('🚀 ~ file: nav-links.tsx:#43, ~ x:', pathname);
 
   return (
     <>
