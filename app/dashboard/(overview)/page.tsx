@@ -2,13 +2,17 @@ import { Card } from '@/app/ui/dashboard/cards';
 import RevenueChart from '@/app/ui/dashboard/revenue-chart';
 import LatestInvoices from '@/app/ui/dashboard/latest-invoices';
 import { lusitana } from '@/app/ui/fonts';
-import {fetchRevenue, fetchLatestInvoices, fetchCardData} from '@/app/lib/data'; // 데이터베이스에서 데이터를 가져오는 쿼리(select문)를 실행하는 함수
+// import {fetchRevenue, fetchLatestInvoices, fetchCardData} from '@/app/lib/data'; // 데이터베이스에서 데이터를 가져오는 쿼리(select문)를 실행하는 함수
+import { fetchLatestInvoices, fetchCardData} from '@/app/lib/data'; // fetchRevenue (느린 데이터요청을 상정한 함수)는 Suspense를 사용하기위해 제외했다.
+
+import { Suspense } from 'react'; // Suspense 컴포넌트를 임포트
+import { RevenueChartSkeleton } from '@/app/ui/skeletons'; // RevenueChart를 표시할 부분의 스켈레톤 UI 컴포넌트를 임포트
 
 // 비동기로 데이터를 습득하기 위해 async/await 사용
 export default async function Page() {
   // 데이터 가져오기의 경우 각 요청은 이전 요청이 데이터를 반환한 후에만 시작할 수 있습니다.(request waterfalls)
 
-  const revenue = await fetchRevenue();
+  // const revenue = await fetchRevenue(); // fetchRevenue (느린 데이터요청을 상정한 함수)는 Suspense를 사용하기위해 제외했다.
   const latestInvoices = await fetchLatestInvoices(); // fetchRevenue() 가 종료된 다음 실행된다.
 
   // 일반적인 변수 할당 방법
@@ -27,7 +31,7 @@ export default async function Page() {
     numberOfInvoices,
     totalPaidInvoices,
     totalPendingInvoices,
-  } = await fetchCardData(); // fetchRevenue() 가 종료된 다음 실행된다.
+  } = await fetchCardData(); // fetchLatestInvoices() 가 종료된 다음 실행된다.
 
   return (
     <main>
@@ -45,8 +49,15 @@ export default async function Page() {
         />
       </div>
       <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-4 lg:grid-cols-8">
-        <RevenueChart revenue={revenue}  />
-         <LatestInvoices latestInvoices={latestInvoices} />
+        {/* Suspense 컴포넌트를 사용해서, 특정 컴포넌트를 스트리밍 */}
+        {/* 일부 조건이 충족될 때까지(예: 데이터 로드) 애플리케이션의 렌더링 부분을 연기할 수 있습니다. */}
+        {/* 렌더링을 연기할 때, 폴백UI(로딩중임을 나타내는 UI를 만든 컴포넌트)를 표시하기 위한 컴포넌트를 지정할 수 있다. */}
+        <Suspense fallback={<RevenueChartSkeleton />}>
+          {/* RevenueChart 컴포넌트 내부에서 데이터를 가져오고있다(느린 속도의 데이터 습득을 상정한 함수 실행중) */}
+          {/* 이제, RevenueChart 에서 데이터를 다 받기 전에도 RevenueChart 이외의 부분은 렌더링된다! */}
+          <RevenueChart />
+        </Suspense>
+        <LatestInvoices latestInvoices={latestInvoices} />
       </div>
     </main>
   );

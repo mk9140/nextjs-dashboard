@@ -2,6 +2,7 @@ import { generateYAxis } from '@/app/lib/utils';
 import { CalendarIcon } from '@heroicons/react/24/outline';
 import { lusitana } from '@/app/ui/fonts';
 import { Revenue } from '@/app/lib/definitions';
+import { fetchRevenue } from '@/app/lib/data'; // fetchRevenue (느린 데이터요청을 상정한 함수) 임포트
 
 // This component is representational only.
 // For data visualization UI, check out:
@@ -9,11 +10,15 @@ import { Revenue } from '@/app/lib/definitions';
 // https://www.chartjs.org/
 // https://airbnb.io/visx/
 
-export default async function RevenueChart({
-  revenue,
-}: {
-  revenue: Revenue[];
-}) {
+// props로 revenue를 받아오는 방식에서, 자제적으로 데이터를 가져오는 방식으로 변경하기 위해 props를 제거하고, fetchRevenue() 함수를 컴포넌트 내부에서 실행하도록 변경.
+// export default async function RevenueChart({
+//   revenue,
+// }: {
+//   revenue: Revenue[];
+// }) {
+export default async function RevenueChart() { // Make component async, remove the props
+  const revenue = await fetchRevenue(); // Fetch data inside the component
+
   const chartHeight = 350;
   // NOTE: comment in this code when you get to this point in the course
 
