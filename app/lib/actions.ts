@@ -38,3 +38,23 @@ export async function createInvoice(formData: FormData) {
   revalidatePath('/dashboard/invoices'); // 캐시를 지우고 요청을 다시 트리거 하기 위해 사용
   redirect('/dashboard/invoices'); // 리다이렉트
 }
+
+const UpdateInvoice = FormSchema.omit({ id: true, date: true }); // Use Zod to update the expected types
+export async function updateInvoice(id: string, formData: FormData) {
+  const { customerId, amount, status } = UpdateInvoice.parse({
+    customerId: formData.get('customerId'),
+    amount: formData.get('amount'),
+    status: formData.get('status'),
+  });
+
+  const amountInCents = amount * 100;
+
+  await sql`
+    UPDATE invoices
+    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+    WHERE id = ${id}
+  `;
+
+  revalidatePath('/dashboard/invoices');
+  redirect('/dashboard/invoices');
+}
