@@ -2,6 +2,8 @@
 
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline';
 import { useSearchParams, usePathname, useRouter } from 'next/navigation';
+import { useDebouncedCallback } from 'use-debounce'; // 디바운싱용 라이브러리
+
 // Next.js 의 useSearchParams 훅(hook) : 현재 URL의 쿼리 매개변수에 액세스할 수 있습니다.
 // 예를 들어 현재 URL과 쿼리 매개변수가 다음과 같을 때 :/dashboard/invoices?page=1&query=pending
 // 결과는 다음과 같이 보일 것입니다 : {page: '1', query: 'pending'}
@@ -16,7 +18,16 @@ export default function Search({ placeholder }: { placeholder: string }) {
   const pathname = usePathname(); // 현재 URL의 경로를 가져온다.
   const { replace } = useRouter(); // AppRouterInstance의 기능 중, 라우터 정보를 수정 할 수 있는 메소드인 replace 를 가져온다.
 
-  function handleSearch(term: string) {
+  const handleSearch = useDebouncedCallback((term) => {
+    // 주의.
+    // 유저가 검색어를 입력할 때마다, URL이 업데이트 됩니다.
+    // 즉, ABCD 를 검색하고 싶은 경우 -> A, AB, ABC, ABCD 총 4번 URL이 업데이트 됩니다.
+    // 이는 불필요한 네트워크 요청을 발생시킬 수 있습니다.
+    // -> 입력이 되고 일정시간 뒤에 처리 되도록하는 '디바운싱' 기법을 사용하면 좋습니다.
+    // 'use-debounce' 라는 라이브러리가 있으니 사용해 보자.(npm i use-debounce)
+
+
+
     const params = new URLSearchParams(searchParams); // URLSearchParams: URL 쿼리 매개변수를 조작하기 위한 유틸리티 메서드를 제공하는 웹 API
     // 다음과 같은 형식으로 매개변수 문자열을 얻을 수 있습니다 : '?page=1&query=a'
 
@@ -28,7 +39,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
     }
     replace(`${pathname}?${params.toString()}`); // URL업데이트 : 현재 경로에 쿼리 매개변수를 추가한다(params는 URL친화적인 형태로 변환)
 
-  }
+  }, 300);
 
   return (
     <div className="relative flex flex-1 flex-shrink-0">
