@@ -5,7 +5,7 @@ import { CreateInvoice } from '@/app/ui/invoices/buttons';
 import { lusitana } from '@/app/ui/fonts';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
-
+import { fetchInvoicesPages } from '@/app/lib/data';
 /*
 참고
 여기서는 searchParams 을 사용했다.
@@ -30,7 +30,7 @@ ui/search.tsx 는 클라이언트 구성 요소('use client' 주석이 있음)�
 export default async function Page({searchParams}: {searchParams?: {query?: string, page?: string} } ) {
   const query = searchParams?.query || '';
   const currentPage = Number(searchParams?.page) || 1;
-
+  const totalPages = await fetchInvoicesPages(query); // 페이지네이션에 사용할 총 페이지수
   return (
     <div className="w-full">
       <div className="flex w-full items-center justify-between">
@@ -47,7 +47,7 @@ export default async function Page({searchParams}: {searchParams?: {query?: stri
         <Table query={query} currentPage={currentPage} />
       </Suspense>
       <div className="mt-5 flex w-full justify-center">
-        {/* <Pagination totalPages={totalPages} /> */}
+        <Pagination totalPages={totalPages} />
       </div>
     </div>
   );

@@ -30,7 +30,7 @@ export default function Search({ placeholder }: { placeholder: string }) {
 
     const params = new URLSearchParams(searchParams); // URLSearchParams: URL 쿼리 매개변수를 조작하기 위한 유틸리티 메서드를 제공하는 웹 API
     // 다음과 같은 형식으로 매개변수 문자열을 얻을 수 있습니다 : '?page=1&query=a'
-
+    params.set('page', '1'); // 페이지네이션을 위해, 검색어가 입력되면 페이지 매개변수를 1로 설정합니다.
     // input 태그에 무언가 입력된다면, query 라는 이름의 쿼리 매개변수를 추가하고, 그 값은 input 태그에 입력된 값으로 설정한다.
     if (term) {
       params.set('query', term);
