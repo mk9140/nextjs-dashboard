@@ -11,7 +11,7 @@ export default async function InvoicesTable({
   query: string;
   currentPage: number;
 }) {
-  const invoices = await fetchFilteredInvoices(query, currentPage);
+  const invoices = await fetchFilteredInvoices(query, currentPage); // 검색 쿼리와 일치하는 송장을 반환
 
   return (
     <div className="mt-6 flow-root">
