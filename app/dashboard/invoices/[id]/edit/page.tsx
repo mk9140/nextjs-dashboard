@@ -9,6 +9,7 @@
 import Form from '@/app/ui/invoices/edit-form';
 import Breadcrumbs from '@/app/ui/invoices/breadcrumbs';
 import { fetchInvoiceById, fetchCustomers } from '@/app/lib/data';
+import { notFound } from 'next/navigation'; // error.tsx를 사용해도 되지만, 404 페이지를 보여주는 것이 더 좋으므로 notFound를 사용한다.
 
 export default async function Page({ params }: { params: { id: string } }) {
   // 편집 화면에서는 유저가 선택한(클릭한) 송장의 내용이 미리 채워져 있어야 한다.
@@ -17,6 +18,11 @@ export default async function Page({ params }: { params: { id: string } }) {
     fetchInvoiceById(id),
     fetchCustomers(),
   ]);
+
+  // 송장이 존재하지 않는다면 404 페이지를 보여준다.
+  if (!invoice) {
+    notFound();
+  }
 
   return (
     <main>

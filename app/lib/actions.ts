@@ -30,11 +30,18 @@ export async function createInvoice(formData: FormData) {
   const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식의 날짜를 반환한다.
 
   // insert수행
-  await sql`
-    INSERT INTO invoices (customer_id, amount, status, date)
-    VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-  `;
+  try {
+    await sql`
+        INSERT INTO invoices (customer_id, amount, status, date)
+        VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
+      `;
+  } catch (error) {
+    return {
+      message: 'Database Error: Failed to Create Invoice.',
+    };
+  }
 
+  // try/catch 블럭 밖에 있음을 주목하자.
   revalidatePath('/dashboard/invoices'); // 캐시를 지우고 요청을 다시 트리거 하기 위해 사용
   redirect('/dashboard/invoices'); // 리다이렉트
 }
@@ -49,18 +56,29 @@ export async function updateInvoice(id: string, formData: FormData) {
 
   const amountInCents = amount * 100;
 
-  await sql`
-    UPDATE invoices
-    SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-    WHERE id = ${id}
-  `;
+  try {
+    await sql`
+        UPDATE invoices
+        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
+        WHERE id = ${id}
+      `;
+  } catch (error) {
+    return { message: 'Database Error: Failed to Update Invoice.' };
+  }
 
   revalidatePath('/dashboard/invoices');
   redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(id: string) {
-  await sql`DELETE FROM invoices WHERE id = ${id}`;
-  revalidatePath('/dashboard/invoices');
-  // 인덱스화면에서 삭제 버튼을 누르므로, 삭제 후 딱히 리다이렉트 할 필요 없다.
+  throw new Error('Failed to Delete Invoice'); // error.tsx 동작 확인용 에러
+
+  try {
+    await sql`DELETE FROM invoices WHERE id = ${id}`;
+    revalidatePath('/dashboard/invoices');
+    // 인덱스화면에서 삭제 버튼을 누르므로, 삭제 후 딱히 리다이렉트 할 필요 없다.
+    return { message: 'Deleted Invoice.' };
+  } catch (error) {
+    return { message: 'Database Error: Failed to Delete Invoice.' };
+  }
 }
