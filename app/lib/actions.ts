@@ -8,24 +8,49 @@ import { redirect } from 'next/navigation';
 
 const FormSchema = z.object({
   id: z.string(),
-  customerId: z.string(),
-  amount: z.coerce.number(),
-  status: z.enum(['pending', 'paid']),
+  customerId: z.string({
+    // validation error message
+    invalid_type_error: 'Please select a customer.',
+  }),
+  amount: z.coerce.number().gt(0, { message: 'Please enter a valid amount.'}),
+  status: z.enum(['pending', 'paid'], {
+    invalid_type_error: 'Please select an invoice status.',
+  }),
   date: z.string(),
+
 }); // Zod 라이브러리 사용
 const CreateInvoice = FormSchema.omit({ id: true, date: true });
 
-export async function createInvoice(formData: FormData) {
+export type State = {
+  errors?: {
+    customerId?: string[];
+    amount?: string[];
+    status?: string[];
+  };
+  message?: string | null;
+};
+// contains the state passed from the useFormState hook. You won't be using it in the action in this example, but it's a required prop.
+export async function createInvoice(prevState: State, formData: FormData) {
   // input 태그로부터 반환된 값을 데이터베이스에 저장하기 전에,
   // 타입이 맞는지 확인해야 한다.
   // 예를 들어, input 태그 type 이 number 라고 해도, 실제 반환되는 타입은 string을 반환된다.
   // 검증 작업을 쉽게 하기 위해 Zod 라는 라이브러리를 사용해보자.
 
-  const { customerId, amount, status } = CreateInvoice.parse({
+  const validatedFields = CreateInvoice.safeParse({
     customerId: formData.get('customerId'),
     amount: formData.get('amount'),
     status: formData.get('status'),
   });
+
+  // If form validation fails, return errors early. Otherwise, continue.
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: 'Missing Fields. Failed to Create Invoice.',
+    };
+  }
+  // Prepare data for insertion into the database
+  const { customerId, amount, status } = validatedFields.data;
   const amountInCents = amount * 100;
   const date = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식의 날짜를 반환한다.
 
