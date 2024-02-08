@@ -5,7 +5,7 @@ const {
   revenue,
   users,
 } = require('../app/lib/placeholder-data.js');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcrypt'); // 비밀번호를 데이터베이스에 저장하기 전에 해시
 
 async function seedUsers(client) {
   try {
