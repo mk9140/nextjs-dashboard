@@ -6,6 +6,14 @@ import { lusitana } from '@/app/ui/fonts';
 import { InvoicesTableSkeleton } from '@/app/ui/skeletons';
 import { Suspense } from 'react';
 import { fetchInvoicesPages } from '@/app/lib/data';
+import { Metadata } from 'next';
+
+// pages will override the metadata in the parent.
+export const metadata: Metadata = {
+  // 루트레이아웃에서 정의한 메타데이터의 title을 페이지의 용도에 맞는 값으로 바꾸었다.
+  title: 'Invoices',
+};
+
 /*
 참고
 여기서는 searchParams 을 사용했다.
